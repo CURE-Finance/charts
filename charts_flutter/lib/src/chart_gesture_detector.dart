@@ -15,9 +15,11 @@
 
 import 'dart:async' show Timer;
 import 'dart:math' show Point;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart'
     show
         BuildContext,
+        MouseRegion,
         GestureDetector,
         RenderBox,
         ScaleEndDetails,
@@ -44,8 +46,7 @@ class ChartGestureDetector {
 
   late _ContainerResolver _containerResolver;
 
-  makeWidget(BuildContext context, ChartContainer chartContainer,
-      Set<GestureType> desiredGestures) {
+  makeWidget(BuildContext context, ChartContainer chartContainer, Set<GestureType> desiredGestures) {
     _containerResolver = () {
       final renderObject = context.findRenderObject()!;
 
@@ -63,7 +64,10 @@ class ChartGestureDetector {
     _listeningForLongPress = desiredGestures.contains(GestureType.onLongPress);
 
     return new GestureDetector(
-      child: chartContainer,
+      child: MouseRegion(
+        child: chartContainer,
+        onHover: onHover,
+      ),
       onTapDown: wantTapDown ? onTapDown : null,
       onTapUp: wantTap ? onTapUp : null,
       onScaleStart: wantDrag ? onScaleStart : null,
@@ -72,10 +76,17 @@ class ChartGestureDetector {
     );
   }
 
+  void onHover(PointerHoverEvent e) {
+    final container = _containerResolver();
+    _lastTapPoint = new Point(e.localPosition.dx, e.localPosition.dy);
+    container.gestureProxy.onHover(_lastTapPoint!);
+  }
+
   void onTapDown(TapDownDetails d) {
     final container = _containerResolver();
     final localPosition = container.globalToLocal(d.globalPosition);
     _lastTapPoint = new Point(localPosition.dx, localPosition.dy);
+    print(_lastTapPoint);
     container.gestureProxy.onTapTest(_lastTapPoint!);
 
     // Kick off a timer to see if this is a LongPress.
@@ -131,8 +142,7 @@ class ChartGestureDetector {
 
     final container = _containerResolver();
 
-    container.gestureProxy
-        .onDragEnd(_lastTapPoint!, _lastScale!, d.velocity.pixelsPerSecond.dx);
+    container.gestureProxy.onDragEnd(_lastTapPoint!, _lastScale!, d.velocity.pixelsPerSecond.dx);
   }
 }
 

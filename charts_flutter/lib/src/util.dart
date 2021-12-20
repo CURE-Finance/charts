@@ -14,11 +14,7 @@
 // limitations under the License.
 
 import 'package:flutter/rendering.dart'
-    show
-        RenderBox,
-        RenderSemanticsGestureHandler,
-        RenderPointerListener,
-        RenderCustomMultiChildLayoutBox;
+    show RenderBox, RenderMouseRegion, RenderSemanticsGestureHandler, RenderPointerListener, RenderCustomMultiChildLayoutBox;
 import 'chart_container.dart' show ChartContainerRenderObject;
 
 /// Get the [ChartContainerRenderObject] from a [RenderBox].
@@ -32,12 +28,13 @@ ChartContainerRenderObject getChartContainerRenderObject(RenderBox box) {
       .firstWhere((child) => child is RenderSemanticsGestureHandler);
 
   assert(semanticHandler is RenderSemanticsGestureHandler);
-  final renderPointerListener =
-      (semanticHandler as RenderSemanticsGestureHandler).child;
+  final renderPointerListener = (semanticHandler as RenderSemanticsGestureHandler).child;
 
   assert(renderPointerListener is RenderPointerListener);
-  final chartContainerRenderObject =
-      (renderPointerListener as RenderPointerListener).child;
+  final renderMouseRegion = (renderPointerListener as RenderPointerListener).child;
+
+  assert(renderMouseRegion is RenderMouseRegion);
+  final chartContainerRenderObject = (renderMouseRegion as RenderMouseRegion).child;
 
   assert(chartContainerRenderObject is ChartContainerRenderObject);
 
